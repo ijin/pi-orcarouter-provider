@@ -1,0 +1,52 @@
+{
+  "name": "pi-orcarouter-provider",
+  "version": "0.1.0",
+  "description": "OrcaRouter provider for Pi: full chat catalog, /login, measured free-tier safeguards, /orca-usage and a balance status",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi-provider",
+    "pi",
+    "orcarouter",
+    "llm"
+  ],
+  "homepage": "https://github.com/ijin/pi-orcarouter-provider#readme",
+  "bugs": {
+    "url": "https://github.com/ijin/pi-orcarouter-provider/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ijin/pi-orcarouter-provider.git"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc -p .",
+    "snapshot": "node scripts/generate-snapshot.ts",
+    "check": "npm run typecheck && npm test"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "1.0.0",
+    "@earendil-works/pi-coding-agent": "1.0.0",
+    "@types/node": "^24",
+    "typescript": "~5.9"
+  }
+}
