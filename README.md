@@ -2,7 +2,7 @@
 
 [OrcaRouter](https://orcarouter.ai) provider for [Pi](https://pi.dev).
 
-> Community project, not affiliated with or endorsed by OrcaRouter. Not related to `@tejasa97/pi-orcarouter-provider`.
+> Community project, not affiliated with or endorsed by OrcaRouter.
 
 - Native provider `orcarouter` with the full chat catalog (166 models at the time of writing), discovered from OrcaRouter's public catalog and cached for 24 hours.
 - `/login orcarouter`, with the `ORCAROUTER_API_KEY` environment variable as a fallback.
