@@ -1,6 +1,6 @@
 {
   "name": "pi-orcarouter-provider",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OrcaRouter provider for Pi: full chat catalog, /login, measured free-tier safeguards, /orca-usage and a balance status",
   "type": "module",
   "license": "MIT",
@@ -48,5 +48,6 @@
     "@earendil-works/pi-coding-agent": "1.0.0",
     "@types/node": "^24",
     "typescript": "~5.9"
-  }
+  },
+  "author": "Michael H. Oshita (https://github.com/ijin)"
 }
