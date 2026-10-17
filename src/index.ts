@@ -34,6 +34,13 @@ export default async function orcaRouter(pi: ExtensionAPI): Promise<void> {
 	});
 	const status = new BalanceStatus(account);
 	const quietly = (promise: Promise<unknown>) => void promise.catch(() => {});
+	// Checked at session start and after every turn, so long-running sessions also pick up the
+	// daily catalog refresh. Throttled in CatalogStore so failures don't retry on every turn.
+	const refreshCatalogIfStale = (ctx: ExtensionContext) => {
+		if (process.env.PI_OFFLINE === undefined && catalog.claimAutoRefresh()) {
+			quietly(ctx.modelRegistry.refresh({ providers: [PROVIDER_ID], allowNetwork: true }));
+		}
+	};
 
 	const track = (ctx: ExtensionContext) => {
 		latest = ctx;
@@ -43,9 +50,7 @@ export default async function orcaRouter(pi: ExtensionAPI): Promise<void> {
 	pi.on("session_start", async (_event, ctx) => {
 		track(ctx);
 		quietly(status.onModelChanged(ctx.model?.provider));
-		if (process.env.PI_OFFLINE === undefined && catalog.isStale()) {
-			quietly(ctx.modelRegistry.refresh({ providers: [PROVIDER_ID], allowNetwork: true }));
-		}
+		refreshCatalogIfStale(ctx);
 	});
 
 	pi.on("model_select", async (event, ctx) => {
@@ -56,6 +61,7 @@ export default async function orcaRouter(pi: ExtensionAPI): Promise<void> {
 	pi.on("agent_end", async (_event, ctx) => {
 		track(ctx);
 		quietly(status.onTurnEnd());
+		refreshCatalogIfStale(ctx);
 	});
 
 	pi.on("message_end", async (event) => {

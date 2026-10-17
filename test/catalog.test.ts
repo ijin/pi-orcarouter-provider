@@ -3,7 +3,7 @@ import { mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { CACHE_FORMAT_VERSION, CatalogStore, type CatalogSnapshot, fetchRawCatalog } from "../src/catalog.ts";
+import { AUTO_REFRESH_RETRY_MS, CACHE_FORMAT_VERSION, CatalogStore, type CatalogSnapshot, fetchRawCatalog } from "../src/catalog.ts";
 import { POLICY_VERSION } from "../src/metadata.ts";
 
 const embedded = (): CatalogSnapshot => ({
@@ -90,4 +90,19 @@ test("staleness: TTL and policy version", () => {
 		embedded: () => ({ ...embedded(), policyVersion: POLICY_VERSION - 1 }),
 	});
 	assert.equal(oldPolicy.isStale(), true);
+});
+
+test("auto refresh: only when stale, at most once per retry interval", async () => {
+	const ttlMs = 3 * AUTO_REFRESH_RETRY_MS;
+	let now = 1_000;
+	const store = new CatalogStore({ cacheDir: "/nonexistent", fetch: fakeFetch().impl, now: () => now, ttlMs, embedded });
+	assert.equal(store.claimAutoRefresh(), false, "fresh catalog");
+	now = 1_000 + ttlMs + 1;
+	assert.equal(store.claimAutoRefresh(), true, "stale: first attempt");
+	assert.equal(store.claimAutoRefresh(), false, "throttled while the attempt is recent");
+	now += AUTO_REFRESH_RETRY_MS;
+	assert.equal(store.claimAutoRefresh(), true, "retry after the interval");
+	await store.refresh();
+	now += AUTO_REFRESH_RETRY_MS;
+	assert.equal(store.claimAutoRefresh(), false, "fresh again after a successful refresh");
 });

@@ -13,6 +13,8 @@ import { POLICY_VERSION, type RawCatalog, type RawModelsEntry, type RawPricingEn
 
 export const CACHE_FORMAT_VERSION = 1;
 export const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
+/** Minimum spacing between automatic refresh attempts, so an offline session doesn't retry every turn. */
+export const AUTO_REFRESH_RETRY_MS = 10 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 20_000;
 const API_ORIGIN = "https://api.orcarouter.ai";
 
@@ -142,6 +144,7 @@ export class CatalogStore {
 	private readonly path: string;
 	private readonly now: () => number;
 	private readonly ttlMs: number;
+	private lastAutoAttempt = Number.NEGATIVE_INFINITY;
 	readonly options: CatalogStoreOptions;
 
 	constructor(options: CatalogStoreOptions) {
@@ -173,6 +176,18 @@ export class CatalogStore {
 	/** Stale when older than the TTL or produced under a different assembly policy. */
 	isStale(): boolean {
 		return this.now() - this.current.fetchedAt > this.ttlMs || this.current.policyVersion !== POLICY_VERSION;
+	}
+
+	/**
+	 * True when an automatic (background) refresh should start now: the catalog is stale and no
+	 * automatic attempt was made in the last AUTO_REFRESH_RETRY_MS. A true result records the attempt.
+	 */
+	claimAutoRefresh(): boolean {
+		if (!this.isStale()) return false;
+		const now = this.now();
+		if (now - this.lastAutoAttempt < AUTO_REFRESH_RETRY_MS) return false;
+		this.lastAutoAttempt = now;
+		return true;
 	}
 
 	/** Fetch a fresh catalog. Concurrent callers share one request; failures keep the last catalog. */
