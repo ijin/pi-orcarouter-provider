@@ -6,7 +6,7 @@ Method: before each request was sent, the expected pass or fail result was writt
 
 ## Free-tier prompt cap
 
-- **Rule.** A request is rejected when the gateway's own estimate exceeds **128,000**: an estimate of 128,000 passed and 128,001 failed. The limit is the same for DeepSeek V4 Flash, HY3, HY4 preview and GLM 5.3 Flash (all free).
+- **Rule.** A request is rejected when the gateway's own estimate exceeds **128,000**: an estimate of 128,000 passed and 128,001 failed. The limit is the same for DeepSeek V4 Flash, HY3, HY4 preview and GLM 5.3 Flash (all free). DeepSeek V4.1 Flash Free, added to the catalog later, has the same limit (2026-10-19: 128,000 passed, 128,001 failed).
 - **Error.** HTTP 400 `{"error":{"code":"free_rate_limited","metadata":{"reason":"err_free_prompt_cap","retryable":false}}}`.
 - **What the gateway counts.** The estimate is a weighted count of text features: word runs, digit runs, CJK characters, symbols, newlines and spaces. It matches the heuristic in the open-source new-api gateway, with differences measured here:
   - Runs of four or more spaces are heavily discounted.
@@ -17,14 +17,16 @@ Method: before each request was sent, the expected pass or fail result was writt
 
 ## Gateway estimate vs. model-reported prompt tokens
 
-| Content | DeepSeek | HY3 | HY4 | GLM |
-| --- | --- | --- | --- | --- |
-| English prose | 1.22 | 1.21 | 1.21 | 1.19 |
-| Markdown docs | 1.13 | 1.15 | 1.16 | 1.17 |
-| JS code | 1.08 | 1.12 | 1.10 | 1.15 |
-| Japanese prose | 1.10 | 1.01 | 1.07 | 1.01 |
-| JSON / TS declarations | 0.99–1.00 | 1.02 | 1.01–1.03 | 1.04–1.07 |
-| `ls -lR` output / numeric CSV | 0.83–1.00 | 0.84–0.99 | 0.85–1.03 | 0.81–0.94 |
+| Content | DeepSeek V4 | DeepSeek V4.1 | HY3 | HY4 | GLM |
+| --- | --- | --- | --- | --- | --- |
+| English prose | 1.22 | 1.22 | 1.21 | 1.21 | 1.19 |
+| Markdown docs | 1.13 | 1.13 | 1.15 | 1.16 | 1.17 |
+| JS code | 1.08 | 1.08 | 1.12 | 1.10 | 1.15 |
+| Japanese prose | 1.10 | 1.10 | 1.01 | 1.07 | 1.01 |
+| JSON / TS declarations | 0.99–1.00 | 1.00 | 1.02 | 1.01–1.03 | 1.04–1.07 |
+| `ls -lR` output / numeric CSV | 0.83–1.00 | not measured | 0.84–0.99 | 0.85–1.03 | 0.81–0.94 |
+
+DeepSeek V4.1 Flash (2026-10-19): the free and paid routes reported identical token counts on every sample, and the counts match V4 Flash on the shared JS sample, so the two versions appear to use the same tokenizer.
 
 The cap therefore falls at about 105K reported tokens on real content. **An 88K context window leaves about 19% margin.** Synthetic word salad reaches 1.5, so pathological input can still hit the cap; normalizing the error lets Pi compact and retry in that case.
 
