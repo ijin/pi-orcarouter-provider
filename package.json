@@ -1,6 +1,6 @@
 {
   "name": "pi-orcarouter-provider",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "OrcaRouter provider for Pi: full chat catalog, /login, measured free-tier safeguards, /orca-usage and a balance status",
   "type": "module",
   "license": "MIT",
@@ -10,6 +10,7 @@
     "pi-provider",
     "pi",
     "orcarouter",
+    "pi-orcarouter",
     "llm"
   ],
   "homepage": "https://github.com/ijin/pi-orcarouter-provider#readme",

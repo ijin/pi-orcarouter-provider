@@ -1,6 +1,6 @@
 # pi-orcarouter-provider
 
-[OrcaRouter](https://orcarouter.ai) provider for [Pi](https://pi.dev).
+[OrcaRouter](https://orcarouter.ai) provider for the [Pi](https://pi.dev) coding agent.
 
 > Community project, not affiliated with or endorsed by OrcaRouter.
 
